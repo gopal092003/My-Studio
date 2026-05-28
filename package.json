@@ -1,0 +1,8 @@
+{
+  "name": "gg-studios",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}

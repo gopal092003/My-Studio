@@ -1,0 +1,49 @@
+/gg-studios
+│
+├── apps/
+│   ├── web/                     # Main frontend
+│   │   ├── app/
+│   │   │   ├── page.tsx
+│   │   │   ├── globals.css
+│   │   │   └── layout.tsx
+│   │   │
+│   │   ├── components/
+│   │   │   ├── landing/
+│   │   │   │   ├── Hero.tsx
+│   │   │   │   ├── RealmGrid.tsx
+│   │   │   │   ├── RealmCard.tsx
+│   │   │   │   ├── Navbar.tsx
+│   │   │   │   ├── Footer.tsx
+│   │   │   │   └── BackgroundEffects.tsx
+│   │   │   │
+│   │   │   └── ui/
+│   │   │
+│   │   ├── features/
+│   │   │   └── landing/
+│   │   │       ├── constants/
+│   │   │       │   └── realms.ts
+│   │   │       │
+│   │   │       ├── types/
+│   │   │       │   └── realm.types.ts
+│   │   │       │
+│   │   │       └── data/
+│   │   └── package.json 
+│   ├── admin/                   # Admin dashboard
+│   └── api/                     # Separate backend later (optional)
+│
+├── packages/
+│   ├── ui/                      # Shared UI components
+│   ├── config/                  # Shared configs
+│   ├── types/                   # Shared TypeScript types
+│   ├── utils/                   # Shared utilities
+│   └── database/                # Prisma schema & db logic
+│
+├── public/
+│
+├── docs/
+│
+├── docker/
+│
+├── .github/
+│
+└── turbo.json
