@@ -1,8 +1,12 @@
 {
   "name": "gg-studios",
   "private": true,
+  "packageManager": "yarn@1.22.22",
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "devDependencies": {
+    "turbo": "^2.0.0"
+  }
 }
