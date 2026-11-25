@@ -2,19 +2,11 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "GG Studios",
-  description:
-    "A multiverse of creativity — art, poetry, anime, literature, manga, and handcrafted imagination.",
-  keywords: [
-    "GG Studios",
-    "Art",
-    "Poetry",
-    "Anime",
-    "Manga",
-    "Literature",
-    "Creative Platform",
-  ],
-  authors: [{ name: "GG Studios" }],
+  title: {
+    default: "Studio Universe",
+    template: "%s · Studio Universe",
+  },
+  description: "A living studio universe of stories, art, and creative worlds.",
 };
 
 export default function RootLayout({

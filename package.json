@@ -1,11 +1,16 @@
 {
-  "name": "gg-studios",
+  "name": "studio-universe",
   "private": true,
-  "packageManager": "yarn@1.22.22",
+  "packageManager": "npm@11.10.0",
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
+  "scripts": {
+    "dev": "turbo dev --filter=web",
+    "build": "turbo build --filter=web",
+    "start": "npm run start --workspace=web"
+  },
   "devDependencies": {
     "turbo": "^2.0.0"
   }
