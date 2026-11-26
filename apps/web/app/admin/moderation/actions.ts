@@ -55,7 +55,9 @@ export async function deleteReportedContentAction(formData: FormData) {
 
   const removal = report.target_type === "artwork_comment"
     ? await supabase.rpc("admin_delete_artwork_comment", { p_comment_id: report.target_id })
-    : await supabase.rpc("admin_delete_art_chat_message", { p_message_id: report.target_id });
+    : report.target_type === "content_item_comment"
+      ? await supabase.rpc("admin_delete_content_item_comment", { p_comment_id: report.target_id })
+      : await supabase.rpc("admin_delete_art_chat_message", { p_message_id: report.target_id });
   if (removal.error) throw new Error(`Could not remove reported content: ${removal.error.message}`);
 
   const { error: updateError } = await supabase
@@ -68,6 +70,7 @@ export async function deleteReportedContentAction(formData: FormData) {
   revalidatePath("/admin/moderation");
   revalidatePath("/art");
   revalidatePath("/art/chatroom");
+  revalidatePath("/admin");
   revalidatePath("/notifications");
   redirect("/admin/moderation");
 }

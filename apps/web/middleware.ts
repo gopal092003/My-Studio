@@ -6,9 +6,11 @@ export async function middleware(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_PRIMARY_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
   const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PRIMARY_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   const tracksArtwork = /^\/art\/[0-9a-f-]{36}$/i.test(request.nextUrl.pathname);
-  const visitorCookie = "artwork-visitor-id";
+  const tracksPageContent = /^\/(craft|manga|stories|anime|poem|soundtrack)\/[0-9a-f-]{36}$/i.test(request.nextUrl.pathname);
+  const visitorCookie = tracksArtwork ? "artwork-visitor-id" : "page-content-visitor-id";
+  const shouldTrack = tracksArtwork || tracksPageContent;
   const existingVisitorId = request.cookies.get(visitorCookie)?.value;
-  const newVisitorId = tracksArtwork && !existingVisitorId ? crypto.randomUUID() : undefined;
+  const newVisitorId = shouldTrack && !existingVisitorId ? crypto.randomUUID() : undefined;
 
   if (newVisitorId) request.cookies.set(visitorCookie, newVisitorId);
 

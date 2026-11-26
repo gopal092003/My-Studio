@@ -13,7 +13,7 @@ Copy `apps/web/.env.example` to `apps/web/.env.local` and fill in:
 
 - `NEXT_PUBLIC_SUPABASE_PRIMARY_URL`
 - `NEXT_PUBLIC_SUPABASE_PRIMARY_PUBLISHABLE_KEY`
-- `SUPABASE_PRIMARY_SECRET_KEY` (server-only; used by the artwork view counter)
+- `SUPABASE_PRIMARY_SECRET_KEY` (server-only; used by Art and page view counters)
 
 Find these in the Supabase project's API settings. Restart `npm run dev` after
 changing environment values.
@@ -54,6 +54,18 @@ community moderation report queue. It also adds the chat and notifications
 tables to the Supabase Realtime publication. If migration 002 is already
 installed, run 003 as a new additive migration; don't edit applied migration
 files.
+
+## 2b. Enable the other creative pages
+
+After migrations 001–003 have run in the primary project, run
+`supabase/migrations/202611260001_generic_page_features.sql`. It adds searchable
+content fields, multi-image storage, likes, comments, view counts, scheduled
+publishing, comment removal notifications, and the shared page-comment
+moderation target. It also creates the public `content-assets` Storage bucket.
+The Art page keeps its separate artwork tables.
+
+Run this migration once in the primary project. Do not edit a migration that
+has already been applied; create a new migration for later schema changes.
 
 Art stays in the primary project because its likes, comments, user restrictions,
 notifications, and Auth roles all use the primary project's identities. Other
@@ -128,16 +140,45 @@ running an explicit SQL update in the Supabase dashboard.
 - Restricting a user disables new likes, comments, and chat messages; viewing and
   reporting remain available. Removed comments and chat messages, and restriction
   changes, create in-app notifications at `/notifications`.
-- Community moderation currently covers Art comments and the Art chatroom. Use
-  the same report queue and account restrictions for interactive features added
-  on other pages. The analytics admin dashboard is on hold.
+- Community moderation covers Art comments, the Art chatroom, and comments on
+  interactive primary-project creative pages. The analytics admin dashboard
+  is on hold.
 
-The primary secret key is needed to record deduplicated views. It is used only
-inside server code and must never have the `NEXT_PUBLIC_` prefix. The app also
-accepts `SUPABASE_SECRET_KEY` or `SUPABASE_SERVICE_ROLE_KEY` as server-only
-aliases. If no secret key is configured, artwork pages still load but new views
-are not recorded. Public page reads and image display use the publishable key
-and RLS policies.
+The primary secret key is needed to record deduplicated Art and page-content
+views. It is used only inside server code and must never have the
+`NEXT_PUBLIC_` prefix. The app also accepts `SUPABASE_SECRET_KEY` or
+`SUPABASE_SERVICE_ROLE_KEY` as server-only aliases. If no secret key is
+configured, pages still load but new views are not recorded. Public page reads
+and image display use the publishable key and RLS policies.
+
+## 5a. Other creative page behavior
+
+Craft, Manga, Stories/Novels/Books, Anime, Poem, and SoundTrack use the shared
+content editor and page layout. Items have a title, description, body, medium or
+format, optional dimensions, tags, a media type, optional external media URL,
+and up to 20 uploaded images. Use text for chapters and poems, images for
+illustrations, and an audio, video, or document URL when that fits the item.
+Image uploads accept JPEG, PNG, WebP, and GIF files up to 10 MB. Series are not
+modeled yet.
+
+Search matches complete words in title, description, body, medium, dimensions,
+and tags. Every word in a multiword query must match; partial words and fuzzy
+search are not used. Selecting multiple tags returns items with any selected
+tag. Medium filtering matches the selected value. Sort options are newest,
+oldest, title A–Z/Z–A, most viewed, most liked, and most commented. Results are
+paginated 12 per page.
+
+The admin can hide an item or schedule it for publication. Scheduled content
+stays hidden from public queries until its publish time; no cron job is needed.
+Each primary-project detail page counts at most one view per browser per day.
+Signed-in users can like and comment; comments cannot be liked. Only the admin
+can reply or delete comments. Deleting a comment sends its author an in-app
+notification. Users can report comments, and reports appear at
+`/admin/moderation`. Account restrictions block new likes and comments on these
+pages as well as Art interactions. Open an item's comment tools from `/admin`.
+
+The analytics admin dashboard remains on hold. The content desk and moderation
+queue are available separately.
 
 ## 6. Optional second Supabase project
 
@@ -145,8 +186,11 @@ The primary project remains the only Auth project, so users keep one account.
 To put generic content for selected non-Art pages in a second project:
 
 1. Create the second Supabase project.
-2. Run the same migration in that project's SQL Editor. This gives it the same
-   content table and public-read RLS policy.
+2. Run `supabase/migrations/202611250001_content_and_roles.sql` in the second
+   project's SQL Editor, then run
+   `supabase/optional/secondary_content_columns.sql`. These add
+   the content table and searchable/taggable fields with scheduled public reads.
+   Do not run the primary interactive-content migration there.
 3. Add its URL and publishable key to `apps/web/.env.local` as
    `NEXT_PUBLIC_SUPABASE_SECONDARY_URL` and
    `NEXT_PUBLIC_SUPABASE_SECONDARY_PUBLISHABLE_KEY`.
@@ -159,14 +203,18 @@ To put generic content for selected non-Art pages in a second project:
 Secondary-project admin writes use the secret key, which bypasses RLS. The
 server action checks the signed-in user's admin role in the primary project
 before using it. Keep that key out of `NEXT_PUBLIC_` variables, browser code,
-source control, and chat. Secondary content stores the primary account UUID as
-its `created_by` value; user accounts and roles remain in the primary project.
+source control, and chat. Secondary content stores no account ID because the
+second project's Auth users are not linked to primary accounts.
+
+Pages mapped to the secondary project are read-only for visitors. They support
+search, tags, medium, sorting, scheduled publishing, and public media URLs, but
+do not support image uploads, likes, comments, view tracking, or notifications.
+The site's account system remains in primary. To enable interactions on a
+secondary page later, first bridge user identities and install the interaction
+policies and tables for that project.
+
 If a page already has content, move those rows to the destination project before
 changing its mapping so the page continues to find them.
-
-Content currently supports a title, short description, plain text, optional
-media URL, and a published/draft flag. Media URLs can point to an external asset;
-Supabase Storage buckets are not created by this migration.
 
 When adding a new page section, add its slug to the TypeScript section list and
 create a follow-up SQL migration that adds the value to `content_section` in each

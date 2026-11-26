@@ -7,6 +7,7 @@ export type ContentSection =
   | "anime"
   | "poem"
   | "soundtrack";
+export type ContentMediaType = "text" | "image" | "audio" | "video" | "document" | "external";
 
 export type Database = {
   public: {
@@ -50,9 +51,19 @@ export type Database = {
           body: string | null;
           asset_url: string | null;
           is_published: boolean;
+          tags: string[];
+          medium: string | null;
+          dimensions: string | null;
+          media_type: ContentMediaType;
+          scheduled_publish_at: string | null;
+          views_count: number;
+          likes_count: number;
+          comments_count: number;
           created_by: string | null;
           created_at: string;
           updated_at: string;
+          name_sort: string;
+          search_document: string;
         };
         Insert: {
           id?: string;
@@ -62,6 +73,14 @@ export type Database = {
           body?: string | null;
           asset_url?: string | null;
           is_published?: boolean;
+          tags?: string[];
+          medium?: string | null;
+          dimensions?: string | null;
+          media_type?: ContentMediaType;
+          scheduled_publish_at?: string | null;
+          views_count?: number;
+          likes_count?: number;
+          comments_count?: number;
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -74,10 +93,90 @@ export type Database = {
           body?: string | null;
           asset_url?: string | null;
           is_published?: boolean;
+          tags?: string[];
+          medium?: string | null;
+          dimensions?: string | null;
+          media_type?: ContentMediaType;
+          scheduled_publish_at?: string | null;
+          views_count?: number;
+          likes_count?: number;
+          comments_count?: number;
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
+      };
+      content_item_images: {
+        Row: {
+          id: string;
+          content_item_id: string;
+          image_path: string;
+          alt_text: string;
+          sort_order: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          content_item_id: string;
+          image_path: string;
+          alt_text?: string;
+          sort_order?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          content_item_id?: string;
+          image_path?: string;
+          alt_text?: string;
+          sort_order?: number;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      content_item_likes: {
+        Row: { content_item_id: string; user_id: string; created_at: string };
+        Insert: { content_item_id: string; user_id: string; created_at?: string };
+        Update: { content_item_id?: string; user_id?: string; created_at?: string };
+        Relationships: [];
+      };
+      content_item_comments: {
+        Row: {
+          id: string;
+          content_item_id: string;
+          section_slug: ContentSection;
+          user_id: string;
+          parent_comment_id: string | null;
+          author_name: string;
+          body: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          content_item_id: string;
+          section_slug: ContentSection;
+          user_id: string;
+          parent_comment_id?: string | null;
+          author_name?: string;
+          body: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          content_item_id?: string;
+          section_slug?: ContentSection;
+          user_id?: string;
+          parent_comment_id?: string | null;
+          author_name?: string;
+          body?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      content_item_views: {
+        Row: { content_item_id: string; visitor_id: string; viewed_on: string; created_at: string };
+        Insert: { content_item_id: string; visitor_id: string; viewed_on?: string; created_at?: string };
+        Update: { content_item_id?: string; visitor_id?: string; viewed_on?: string; created_at?: string };
         Relationships: [];
       };
       artworks: {
@@ -273,6 +372,8 @@ export type Database = {
           message: string;
           artwork_id: string | null;
           comment_id: string | null;
+          content_item_id: string | null;
+          content_section_slug: ContentSection | null;
           created_at: string;
           read_at: string | null;
         };
@@ -283,6 +384,8 @@ export type Database = {
           message: string;
           artwork_id?: string | null;
           comment_id?: string | null;
+          content_item_id?: string | null;
+          content_section_slug?: ContentSection | null;
           created_at?: string;
           read_at?: string | null;
         };
@@ -293,6 +396,8 @@ export type Database = {
           message?: string;
           artwork_id?: string | null;
           comment_id?: string | null;
+          content_item_id?: string | null;
+          content_section_slug?: ContentSection | null;
           created_at?: string;
           read_at?: string | null;
         };
@@ -303,6 +408,10 @@ export type Database = {
     Functions: {
       is_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
       is_restricted_user: { Args: Record<PropertyKey, never>; Returns: boolean };
+      get_content_item_facets: {
+        Args: { p_section_slug: ContentSection };
+        Returns: { tags: string[]; mediums: string[] };
+      };
       record_artwork_view: {
         Args: { p_artwork_id: string; p_visitor_id: string };
         Returns: boolean;
@@ -317,6 +426,18 @@ export type Database = {
       };
       admin_replace_artwork_images: {
         Args: { p_artwork_id: string; p_image_paths: string[] };
+        Returns: undefined;
+      };
+      admin_replace_content_item_images: {
+        Args: { p_content_item_id: string; p_image_paths: string[]; p_section_slug: ContentSection };
+        Returns: undefined;
+      };
+      record_content_item_view: {
+        Args: { p_content_item_id: string; p_visitor_id: string };
+        Returns: boolean;
+      };
+      admin_delete_content_item_comment: {
+        Args: { p_comment_id: string };
         Returns: undefined;
       };
     };
@@ -336,7 +457,8 @@ export type NotificationKind =
   | "restriction_lifted"
   | "comment_removed"
   | "chat_message_removed"
+  | "content_comment_removed"
   | "report_reviewed";
 
-export type ModerationReportTarget = "artwork_comment" | "chat_message";
+export type ModerationReportTarget = "artwork_comment" | "chat_message" | "content_item_comment";
 export type ModerationReportStatus = "open" | "reviewed" | "dismissed";

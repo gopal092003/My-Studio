@@ -40,14 +40,36 @@ alter table public.artworks
 drop index if exists public.artworks_search_idx;
 alter table public.artworks drop column search_document;
 alter table public.artworks
-  add column search_document tsvector generated always as (
-    to_tsvector(
-      'simple'::regconfig,
-      coalesce(name, '') || ' ' || coalesce(description, '') || ' ' ||
-      coalesce(medium, '') || ' ' || coalesce(dimensions, '') || ' ' ||
-      array_to_string(tags, ' ')
-    )
-  ) stored;
+  add column search_document tsvector not null default ''::tsvector;
+
+create or replace function public.update_artwork_search_document()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  new.search_document := to_tsvector(
+    'simple'::regconfig,
+    coalesce(new.name, '') || ' ' || coalesce(new.description, '') || ' ' ||
+    coalesce(new.medium, '') || ' ' || coalesce(new.dimensions, '') || ' ' ||
+    array_to_string(new.tags, ' ')
+  );
+  return new;
+end;
+$$;
+
+drop trigger if exists artwork_search_document on public.artworks;
+create trigger artwork_search_document
+  before insert or update of name, description, medium, dimensions, tags on public.artworks
+  for each row execute function public.update_artwork_search_document();
+
+update public.artworks
+set search_document = to_tsvector(
+  'simple'::regconfig,
+  coalesce(name, '') || ' ' || coalesce(description, '') || ' ' ||
+  coalesce(medium, '') || ' ' || coalesce(dimensions, '') || ' ' ||
+  array_to_string(tags, ' ')
+);
 create index artworks_search_idx on public.artworks using gin (search_document);
 create index artworks_visible_medium_idx on public.artworks (lower(medium)) where is_visible;
 create index artworks_visible_scheduled_idx on public.artworks (scheduled_publish_at)

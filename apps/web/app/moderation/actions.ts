@@ -25,7 +25,7 @@ export async function reportCommunityContentAction(formData: FormData) {
   const reason = [category, details].filter(Boolean).join(": ").slice(0, 500);
 
   if (!uuidPattern.test(targetId)) throw new Error("The reported item identifier is invalid.");
-  if (targetType !== "artwork_comment" && targetType !== "chat_message") {
+  if (targetType !== "artwork_comment" && targetType !== "chat_message" && targetType !== "content_item_comment") {
     throw new Error("Choose a valid report type.");
   }
   if (category.length < 3 || reason.length < 3) throw new Error("Choose a report reason.");

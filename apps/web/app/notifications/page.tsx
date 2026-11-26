@@ -42,6 +42,9 @@ export default async function NotificationsPage() {
               <div className="notification-meta">
                 <time dateTime={notification.created_at}>{new Date(notification.created_at).toLocaleString()}</time>
                 {notification.artwork_id && <Link href={`/art/${notification.artwork_id}`}>View artwork</Link>}
+                {notification.content_item_id && notification.content_section_slug && (
+                  <Link href={`/${notification.content_section_slug}/${notification.content_item_id}`}>View page content</Link>
+                )}
                 {!notification.read_at && (
                   <form action={markNotificationReadAction}>
                     <input name="notification_id" type="hidden" value={notification.id} />

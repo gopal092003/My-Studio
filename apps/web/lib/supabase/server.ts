@@ -68,7 +68,7 @@ export function createSupabasePrimaryServiceClient() {
 
   if (!secretKey) {
     throw new Error(
-      "Set a server-only Supabase secret key in apps/web/.env.local to enable artwork view tracking.",
+      "Set a server-only Supabase secret key in apps/web/.env.local to enable view tracking.",
     );
   }
 
@@ -82,6 +82,10 @@ export function createSupabasePrimaryServiceClient() {
 }
 
 export function isArtworkViewTrackingConfigured() {
+  return isViewTrackingConfigured();
+}
+
+export function isViewTrackingConfigured() {
   return Boolean(
     process.env.SUPABASE_PRIMARY_SECRET_KEY
       || process.env.SUPABASE_SECRET_KEY

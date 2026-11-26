@@ -45,10 +45,26 @@ create table public.artworks (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   name_sort text generated always as (lower(name)) stored,
-  search_document tsvector generated always as (
-    to_tsvector('simple'::regconfig, name || ' ' || array_to_string(tags, ' '))
-  ) stored
+  search_document tsvector not null default ''::tsvector
 );
+
+create function public.update_artwork_search_document()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  new.search_document := to_tsvector(
+    'simple'::regconfig,
+    coalesce(new.name, '') || ' ' || array_to_string(new.tags, ' ')
+  );
+  return new;
+end;
+$$;
+
+create trigger artwork_search_document
+  before insert or update of name, tags on public.artworks
+  for each row execute function public.update_artwork_search_document();
 
 create index artworks_visible_created_idx
   on public.artworks (created_at desc)

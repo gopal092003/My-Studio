@@ -232,6 +232,38 @@ h1 {
 .content-card p { color: #c4c0b7; line-height: 1.75; white-space: pre-wrap; }
 .content-card .content-summary { color: #b6a47e; }
 .content-card a { color: #d5bd8d; }
+.realm-content-main { display: block; width: min(1180px, 100%); margin: 0 auto; padding: 50px 0 84px; }
+.realm-intro { margin: 12px 0 42px; text-align: center; }
+.realm-intro h1 { font-size: clamp(52px, 8vw, 100px); }
+.realm-intro > p:last-child { margin: 20px auto 0; color: #a7a39b; font-size: 13px; line-height: 1.6; }
+.realm-filters { grid-template-columns: minmax(220px, 1fr) minmax(160px, 220px) minmax(160px, 220px); }
+.realm-content-list { display: grid; width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; text-align: left; }
+.realm-content-card { overflow: hidden; min-width: 0; border: 1px solid rgba(242, 240, 235, 0.11); background: rgba(255, 255, 255, 0.025); padding: 0; }
+.realm-card-image { display: block; overflow: hidden; aspect-ratio: 16 / 10; background: #171715; }
+.realm-card-image img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 260ms ease; }
+.realm-content-card:hover .realm-card-image img { transform: scale(1.025); }
+.realm-card-copy { padding: 18px; }
+.realm-card-copy .eyebrow { margin-bottom: 10px; font-size: 9px; }
+.realm-card-copy h2 { margin-bottom: 8px; font-size: clamp(24px, 3vw, 34px); line-height: 1.12; }
+.realm-card-copy h2 a { color: #e9e5dc; text-decoration: none; }
+.realm-card-copy h2 a:hover { color: #d5bd8d; }
+.realm-card-copy time { color: #8c8982; font-size: 10px; }
+.realm-card-copy .content-summary { margin: 12px 0 0; color: #aaa69e; font-size: 12px; line-height: 1.6; }
+.realm-card-copy .art-card-stats { margin-bottom: 0; }
+.realm-detail-placeholder { display: grid; min-height: 320px; place-items: center; border: 1px solid rgba(242, 240, 235, 0.1); background: radial-gradient(ellipse, rgba(89, 73, 48, 0.19), #171715 70%); color: #b6a47e; font-family: Georgia, "Times New Roman", serif; font-size: 26px; }
+.content-item-body { white-space: pre-wrap; overflow-wrap: anywhere; }
+.content-media-player { display: block; width: 100%; max-height: 520px; margin-top: 22px; }
+.content-media-link { color: #d5bd8d; }
+.content-item-editor { display: grid; gap: 14px; }
+.admin-subheading { margin: 20px 0 12px; color: #e9e5dc; font-family: Georgia, "Times New Roman", serif; font-size: 24px; font-weight: 400; }
+.admin-project-section + .admin-project-section { margin-top: 54px; }
+.admin-item-links { display: flex; flex-wrap: wrap; gap: 16px; margin: -5px 0 18px; font-size: 11px; }
+.admin-item-links a, .admin-main > p a { color: #d5bd8d; }
+.admin-dashboard-note { margin-top: 42px; }
+.admin-page-title { max-width: 900px; font-size: clamp(40px, 6vw, 68px); }
+.admin-page-description { color: #a7a39b; font-size: 13px; line-height: 1.6; }
+.admin-single-comment-delete { margin-top: 8px; }
+.admin-comment-reply { margin-left: clamp(16px, 4vw, 40px); padding-left: 16px; border-left: 1px solid rgba(195, 167, 108, 0.35); }
 
 .art-main, .art-detail-main, .notifications-main { width: min(1120px, 100%); margin: 0 auto; padding: 48px 0 80px; }
 .art-intro { margin: 20px 0 42px; text-align: center; }
@@ -395,6 +427,7 @@ h1 {
 @media (max-width: 760px) {
   .world-links { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .art-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .realm-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 520px) {
@@ -412,6 +445,7 @@ h1 {
   .admin-heading { align-items: flex-start; flex-direction: column; }
   .art-filters { grid-template-columns: 1fr; padding: 14px; }
   .art-grid { grid-template-columns: 1fr; }
+  .realm-filters, .realm-content-list { grid-template-columns: 1fr; }
   .art-detail { grid-template-columns: 1fr; }
   .chatroom-compose { grid-template-columns: 1fr; }
   .art-detail-copy { padding-top: 0; }
