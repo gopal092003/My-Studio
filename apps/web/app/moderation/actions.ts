@@ -2,13 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-
-const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-function safeReturnPath(value: string): string {
-  if (value.startsWith("/") && !value.startsWith("//") && !value.includes("\\")) return value;
-  return "/art";
-}
+import { isUuid, safeInternalPath } from "@/lib/security/input";
 
 function withFlag(path: string, flag: string): string {
   const url = new URL(path, "https://studio.invalid");
@@ -21,10 +15,10 @@ export async function reportCommunityContentAction(formData: FormData) {
   const targetId = String(formData.get("target_id") ?? "");
   const category = String(formData.get("category") ?? "").trim();
   const details = String(formData.get("details") ?? "").trim();
-  const returnPath = safeReturnPath(String(formData.get("return_to") ?? "/art"));
+  const returnPath = safeInternalPath(String(formData.get("return_to") ?? "/art"), "/art");
   const reason = [category, details].filter(Boolean).join(": ").slice(0, 500);
 
-  if (!uuidPattern.test(targetId)) throw new Error("The reported item identifier is invalid.");
+  if (!isUuid(targetId)) throw new Error("The reported item identifier is invalid.");
   if (targetType !== "artwork_comment" && targetType !== "chat_message" && targetType !== "content_item_comment") {
     throw new Error("Choose a valid report type.");
   }

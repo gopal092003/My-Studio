@@ -9,7 +9,10 @@
   "scripts": {
     "dev": "turbo dev --filter=web",
     "build": "turbo build --filter=web",
-    "start": "npm run start --workspace=web"
+    "start": "npm run start --workspace=web",
+    "test:unit": "npm run test:unit --workspace=web",
+    "test:integration": "npm run test:integration --workspace=web",
+    "security:check": "npm run security:check --workspace=web"
   },
   "devDependencies": {
     "turbo": "^2.0.0"

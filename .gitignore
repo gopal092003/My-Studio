@@ -3,6 +3,7 @@ node_modules
 
 # Build outputs
 .next
+.test-build
 out
 dist
 build
